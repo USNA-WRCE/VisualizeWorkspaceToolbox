@@ -1,16 +1,17 @@
 %% WorkspaceExample_RRR
-% Draw the workspace and dexterous workspace for the RRR arm
+% Draw the reachable and dexterous workspace for a planar RRR arm
 %
 %   M. Kutzer, 22Sep2021, USNA
+
+%% Initialize parameters for batch processing videos
 if ~exist('batchProcess','var')
     batchProcess = false;
 end
 
 warning off
 if ~batchProcess
-    clear all
+    clearvars -except batchProcess
 end
-
 close all
 clc
 
@@ -19,17 +20,23 @@ if ~batchProcess
 end
 
 %% Define arm parameters
+% Arm kinematics
 % H_e2o = Rz(q(1))Tx(L(1)Rz(q(2))Tx(L(2))Rz(q(3))Tx(L(3));
 
 if ~batchProcess
-    % Define joint limits
+    % --- Define joint limits ---
+
+    % -> Example 1
     q_lim = [...
         0, pi;...   % Revolute
         0, 2*pi;... % Revolute
         0, 2*pi];   % Revolute
 
-    % Rigid link lengths
+    % --- Rigid link lengths ---
+    
+    % -> Example A
     L = [10,5,3];
+
 end
 % Initial pose
 q_init = [pi/6; pi/6; pi/6];
@@ -44,11 +51,12 @@ kinematics = sprintf('Rz[%d,%d]Tx%dRz[%d,%d]Tx%dRz[%d,%d]Tx%d',...
     L(3));
 jointConfig = sprintf('RRR');
 
+% Define video filename for reachable workspace
 filename = sprintf('Workspace_%s_%s',jointConfig,kinematics);
 
 %% Visualize robot
 % Create figure & axes
-fig = figure('Color',[1 1 1]);
+fig = figure('Color',[1 1 1],'Name','WorkspaceExample_RRR');
 set(fig,'Units','Inches','Position',[0.25,0.65,12.67,5.40]);
 axs = axes('Parent',fig);
 hold(axs,'on');
@@ -83,13 +91,15 @@ p_J{3} = draw2dRevoluteJoint(H(3),2*w,-0.01);
 q = q_init;
 H_e2o = fkin(q,L,H,p_L);
 
-%% Draw Workspace
+%% Draw Reachable Workspace
+title(axs,'Drawing Reachable Workspace');
+
 dw = 0.1;
 X_0 = [];
 plt = plot(axs,0,0,'b','LineWidth',2);
 for q3 = linspace(q_lim(3,1),q_lim(3,2),50)
-    q1 = q_lim(1,1);
     q2 = q_lim(2,1);
+    q1 = q_lim(1,1);
     % Define joint configuration
     q = [q1; q2; q3];
     % Calculate forward kinematics
@@ -146,13 +156,22 @@ for q1 = linspace(q_lim(1,1),q_lim(1,2),300)
     set(pW_0,'Shape',w_0);
     drawVideo(fig,filename,makeVideo);
 end
+
+title(axs,'Reachable Workspace');
+% Show all spaces
+for i = 1:60
+    drawVideo(fig,filename,makeVideo);
+end
 % End video
 endVideo(makeVideo)
 
-%% Hide workspace
+%% Hide reachable workspace
 set(pW_0,'Visible','off');
 
 %% Dexterous workspace
+title(axs,'Drawing Dexterous Workspace');
+
+% Define video filename for dexterous workspace
 filename = sprintf('DexWrkspc_%s_%s',jointConfig,kinematics);
 
 % Define most distal revolute joint test configurations
