@@ -55,8 +55,10 @@ filename = sprintf('Wrkspc_%s_%s',jointConfig,kinematics);
 
 %% Visualize robot
 % Create figure & axes
+posVid = [0.25,0.65,12.67,5.40];
+posImg = [0.25,0.65, 4.42,5.40];
 fig = figure('Color',[1 1 1],'Name','WorkspaceExample_RRP');
-set(fig,'Units','Inches','Position',[0.25,0.65,12.67,5.40]);
+set(fig,'Units','Inches','Position',posVid);
 axs = axes('Parent',fig);
 hold(axs,'on');
 daspect(axs,[1 1 1]);
@@ -96,7 +98,14 @@ title(axs,'Drawing Reachable Workspace');
 dw = 0.1;
 X_0 = [];
 plt = plot(axs,0,0,'b','LineWidth',2);
-for q3 = linspace(q_lim(3,1),q_lim(3,2),50)
+
+% Define number of still images to save
+nImages = 5;
+
+n = 50;
+iImages = round(linspace(1,n,nImages));
+i = 0;
+for q3 = linspace(q_lim(3,1),q_lim(3,2),n)
     q2 = q_lim(2,1);
     q1 = q_lim(1,1);
     % Define joint configuration
@@ -109,6 +118,19 @@ for q3 = linspace(q_lim(3,1),q_lim(3,2),50)
     % Visualize end-effector position
     set(plt,'XData',X_0(1,:),'YData',X_0(2,:));
     drawVideo(fig,filename,makeVideo);
+
+    % Save individual image
+    i = i+1;
+    tf = (i==iImages);
+    if any(tf)
+        set(fig,'Position',posImg);
+        set(axs,'Visible','off')
+        drawnow
+        imageName = sprintf('R%s_q3_%d.png',get(fig,'Name'),find(tf));
+        saveas(axs,imageName,'png');
+        set(fig,'Position',posVid);
+        set(axs,'Visible','on')
+    end
 end
 % Create polyshape (distal joint is P, use linearPoints2pRect)
 p_0 = linearPoints2pRect(X_0,2*dw);
@@ -119,7 +141,10 @@ w_0 = p_0;
 pW_0 = plot(w_0,'LineStyle','none','FaceColor','b','FaceAlpha',0.5);
 delete(plt);
 
-for q2 = linspace(q_lim(2,1),q_lim(2,2),300)
+n = 300;
+iImages = round(linspace(1,n,nImages));
+i = 0;
+for q2 = linspace(q_lim(2,1),q_lim(2,2),n)
     q1 = q_lim(1,1);
     % Define joint configuration
     q = [q1; q2; q3];
@@ -135,11 +160,27 @@ for q2 = linspace(q_lim(2,1),q_lim(2,2),300)
     % Update workspace plot
     set(pW_0,'Shape',w_0);
     drawVideo(fig,filename,makeVideo);
+
+    % Save individual image
+    i = i+1;
+    tf = (i==iImages);
+    if any(tf)
+        set(fig,'Position',posImg);
+        set(axs,'Visible','off')
+        drawnow
+        imageName = sprintf('R%s_q2_%d.png',get(fig,'Name'),find(tf));
+        saveas(axs,imageName,'png');
+        set(fig,'Position',posVid);
+        set(axs,'Visible','on')
+    end
 end
 % Reference polyshape to end-effector
 p_E = transformPolyshape(w_0,invSE(H_Eto0));
 
-for q1 = linspace(q_lim(1,1),q_lim(1,2),300)
+n = 300;
+iImages = round(linspace(1,n,nImages));
+i = 0;
+for q1 = linspace(q_lim(1,1),q_lim(1,2),n)
     % Define joint configuration
     q = [q1; q2; q3];
     % Calculate forward kinematics
@@ -154,6 +195,19 @@ for q1 = linspace(q_lim(1,1),q_lim(1,2),300)
     % Update workspace plot
     set(pW_0,'Shape',w_0);
     drawVideo(fig,filename,makeVideo);
+
+    % Save individual image
+    i = i+1;
+    tf = (i==iImages);
+    if any(tf)
+        set(fig,'Position',posImg);
+        set(axs,'Visible','off')
+        drawnow
+        imageName = sprintf('R%s_q1_%d.png',get(fig,'Name'),find(tf));
+        saveas(axs,imageName,'png');
+        set(fig,'Position',posVid);
+        set(axs,'Visible','on')
+    end
 end
 
 title(axs,'Reachable Workspace');
@@ -181,7 +235,11 @@ for j = 1:numel(q2s)
     q2 = q2s(j);
     X_0 = [];
     plt = plot(axs,0,0,colors(j),'LineWidth',2);
-    for q3 = linspace(q_lim(3,1),q_lim(3,2),50)
+
+    n = 50;
+    iImages = round(linspace(1,n,nImages));
+    i = 0;
+    for q3 = linspace(q_lim(3,1),q_lim(3,2),n)
         q1 = q_lim(1,1);
         % Define joint configuration
         q = [q1; q2; q3];
@@ -193,6 +251,19 @@ for j = 1:numel(q2s)
         % Visualize end-effector position
         set(plt,'XData',X_0(1,:),'YData',X_0(2,:));
         drawVideo(fig,filename,makeVideo);
+
+        % Save individual image
+        i = i+1;
+        tf = (i==iImages);
+        if any(tf)
+            set(fig,'Position',posImg);
+            set(axs,'Visible','off')
+            drawnow
+            imageName = sprintf('D%s_q3_%d.%d.png',get(fig,'Name'),j,find(tf));
+            saveas(axs,imageName,'png');
+            set(fig,'Position',posVid);
+            set(axs,'Visible','on')
+        end
     end
     % Create polyshape
     p_0 = linearPoints2pRect(X_0,2*dw);
@@ -205,7 +276,10 @@ for j = 1:numel(q2s)
         'FaceColor',colors(j),'FaceAlpha',0.5);
     delete(plt);
 
-    for q1 = linspace(q_lim(1,1),q_lim(1,2),300)
+    n = 300;
+    iImages = round(linspace(1,n,nImages));
+    i = 0;
+    for q1 = linspace(q_lim(1,1),q_lim(1,2),n)
         % Define joint configuration
         q = [q1; q2; q3];
         % Calculate forward kinematics
@@ -220,8 +294,34 @@ for j = 1:numel(q2s)
         % Update workspace plot
         set(pW_0(j),'Shape',w_0(j));
         drawVideo(fig,filename,makeVideo);
+
+        % Save individual image
+        i = i+1;
+        tf = (i==iImages);
+        if any(tf)
+            set(fig,'Position',posImg);
+            set(axs,'Visible','off')
+            drawnow
+            imageName = sprintf('D%s_q1_%d.%d.png',get(fig,'Name'),j,find(tf));
+            saveas(axs,imageName,'png');
+            set(fig,'Position',posVid);
+            set(axs,'Visible','on')
+        end
     end
+
+    % Hide other workspaces
+    set(pW_0(j),'Visible','off');
 end
+
+% Show workspaces other workspaces
+set(fig,'Position',posImg);
+set(axs,'Visible','off')
+set(pW_0,'Visible','on');
+drawnow
+imageName = sprintf('D%s_All.png',get(fig,'Name'));
+saveas(axs,imageName,'png');
+set(fig,'Position',posVid);
+set(axs,'Visible','on')
 
 % Find combine workspaces to define dexterous workspace
 dw_0 = intersect(w_0(1),w_0(2));
@@ -251,6 +351,14 @@ end
 % End video
 endVideo(makeVideo)
 
+% Show workspaces other workspaces
+set(fig,'Position',posImg);
+set(axs,'Visible','off')
+drawnow
+imageName = sprintf('D%s.png',get(fig,'Name'));
+saveas(axs,imageName,'png');
+set(fig,'Position',posVid);
+set(axs,'Visible','on')
 
 warning on
 
